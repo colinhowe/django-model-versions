@@ -12,16 +12,17 @@ class VersionedModel(models.Model):
         '''If this model already exists then this performs an update to ensure
         that the model has not already been updated.'''
         if self._version:
-            updated = self.__class__.objects.filter(id=self.id)\
+            updated = self.__class__.objects.filter(id=self.id, _version=self._version)\
                                             .update(_version=F('_version') + 1)
             if updated:
                 # TODO Signals, pre-save, post-save
                 self._version += 1
                 return
             else:
-                raise ConcurrentModificationException()
+                raise ConcurrentModificationException('Model updated already, was version %d' % self._version)
 
         else:
+            self._version = 1
             super(VersionedModel, self).save(*args, **kwargs)
 
 
