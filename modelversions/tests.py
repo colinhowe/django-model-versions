@@ -1,23 +1,59 @@
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
-
-Replace these with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
+from django.conf import settings
+from django.db import models, connection
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.failUnlessEqual(1 + 1, 2)
+from models import VersionedModel, ConcurrentModificationException
 
-__test__ = {"doctest": """
-Another way to test that 1 + 1 is equal to 2.
+class FakeModel(VersionedModel):
+    name = models.CharField(max_length=30)
 
->>> 1 + 1 == 2
-True
-"""}
+class TestVersionedModel(TestCase):
+    def setUp(self):
+        self.old_debug = settings.DEBUG
+        settings.DEBUG = True
+        connection.queries = []
 
+    def tearDown(self):
+        settings.DEBUG = self.old_debug
+
+    def test_save_new(self):
+        m = FakeModel()
+        m.name = 'Hello'
+        m.save()
+
+        m = FakeModel.objects.get(name='Hello')
+        self.assertTrue(m.id != None)
+
+    def test_save_altered(self):
+        m = FakeModel()
+        m.name = 'Hello'
+        m.save()
+
+        self.assertEquals(1, len(connection.queries))
+
+        m = FakeModel.objects.get(name='Hello')
+        m.name = 'Bob'
+        m.save()
+
+        self.assertEquals(3, len(connection.queries))
+
+        m = FakeModel.objects.get(name='Bob')
+        self.assertEquals(1, FakeModel.objects.count())
+
+    def test_save_concurrent(self):
+        m = FakeModel()
+        m.name = 'Hello'
+        m.save()
+
+        m1 = FakeModel.objects.get(name='Hello')
+        m2 = FakeModel.objects.get(name='Hello')
+        m1.name = 'Bob'
+        m1.save()
+
+        try:
+            m2.name = 'Bob'
+            m2.save()
+            self.fail('Should have hit concurrent modification error')
+        except ConcurrentModificationException:
+            # This is what we expect
+            pass
