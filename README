@@ -1,0 +1,34 @@
+django-model-versions
+
+A library for adding version information to models. This version information
+is then used to prevent concurrent modifications. E.g.
+
+>>> b1 = Blog.objects.get(id=1)
+>>> b2 = Blog.objects.get(id=2)
+>>> b1.title = 'Some blog'
+>>> b1.save()
+>>> b2.title = 'Some other blog'
+>>> b2.save()
+
+Will result in a ConcurrentModificationException being raised instead of
+overriding the data saved by b1.
+
+Usage
+-----
+
+Subclass modelversions.VersionedModel instead of django.db.models.Model.
+That's it!
+
+
+Known flaws
+-----------
+
+objects.update(...) will not increment the version number for objects altered.
+This would be better as a mixin.
+
+
+Author
+------
+
+Colin Howe <colin@colinhowe.co.uk>
+http://www.colinhowe.co.uk - @colinhowe
