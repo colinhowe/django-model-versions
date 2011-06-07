@@ -1,2 +1,1 @@
-from models import VersionedModel
-
+VERSION = (0, 1)
