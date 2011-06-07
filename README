@@ -26,6 +26,7 @@ Known flaws
 objects.update(...) will not increment the version number for objects altered.
 This would be better as a mixin.
 object.delete() will not check versioning
+Django admin hates it
 
 
 Author

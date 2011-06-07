@@ -5,7 +5,7 @@ class ConcurrentModificationException(Exception):
     pass
 
 class VersionedModel(models.Model):
-    _version = models.IntegerField()
+    _version = models.IntegerField(null=False, blank=True)
 
 
     def save(self, force_insert=False, force_update=False, using=None):
