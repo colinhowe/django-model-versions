@@ -4,7 +4,7 @@ A library for adding version information to models. This version information
 is then used to prevent concurrent modifications. E.g.
 
 >>> b1 = Blog.objects.get(id=1)
->>> b2 = Blog.objects.get(id=2)
+>>> b2 = Blog.objects.get(id=1) # Same row as b1
 >>> b1.title = 'Some blog'
 >>> b1.save()
 >>> b2.title = 'Some other blog'
