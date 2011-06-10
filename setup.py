@@ -9,7 +9,7 @@ long_desc = open(root_dir + '/README').read()
 
 setup(
 	name='django-model-versions',
-	version='0.1.0',
+	version='0.1.3',
 	description='A base model class for adding version information and preventing concurrent modifications',
 	url='https://github.com/colinhowe/django-model-versions',
 	author='Colin Howe',
