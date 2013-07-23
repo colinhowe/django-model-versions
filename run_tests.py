@@ -8,18 +8,22 @@ from django.core.management import call_command
 
 def setup_test_environment():
     os.environ['PYTHONPATH'] = os.path.abspath(__file__)
-    
+
     settings.configure(**{
-        "DATABASE_ENGINE": "sqlite3",
+        "DATABASES": {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+            }
+        },
         "INSTALLED_APPS": ("modelversions", ),
     })
 
 
 def main():
-    
+
     usage = "%prog [options]"
     parser = optparse.OptionParser(usage=usage)
-    
+
     parser.add_option("-v", "--verbosity",
         action = "store",
         dest = "verbosity",
@@ -34,9 +38,9 @@ def main():
         default = False,
         help = "hook in coverage during test suite run and save out results",
     )
-    
+
     options, _ = parser.parse_args()
-    
+
     if options.coverage:
         try:
             import coverage
@@ -48,11 +52,11 @@ def main():
             cov.start()
     else:
         cov = None
-    
+
     setup_test_environment()
-    
+
     call_command("test", verbosity=int(options.verbosity))
-    
+
     if cov:
         cov.stop()
         cov.save()
